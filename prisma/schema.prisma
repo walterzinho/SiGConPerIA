@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Character {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  imgUrl1     String   @default("")
+  imgUrl2     String   @default("")
+  imgUrl3     String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  campaigns Campaign[]
+}
+
+model Campaign {
+  id               String   @id @default(cuid())
+  characterId      String
+  characterName    String
+  characterDesc    String
+  enfoque          String   @default("consejo")
+  photoStyle       String   @default("cinematic")
+  copyLength       String   @default("medio")
+  facebookFooter   String   @default("")
+  facebookHashtags String   @default("")
+  createdAt        DateTime @default(now())
+
+  character Character       @relation(fields: [characterId], references: [id])
+  items     CampaignItem[]
+}
+
+model CampaignItem {
+  id          String   @id @default(cuid())
+  campaignId  String
+  tema        String
+  titulo      String
+  subtitulo   String
+  mensaje     String
+  copyFacebook String
+  accion      String
+  entorno     String
+  promptFlow  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+}
