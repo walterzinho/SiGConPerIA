@@ -12,6 +12,7 @@ import type {
   CopyLengthType,
 } from "@/types";
 import { PHOTO_STYLES } from "@/types";
+import type { GeminiModel } from "@/store/campaign-store";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -87,6 +88,8 @@ import {
   History,
   ImageIcon,
   Radio as RadioIcon,
+  Key,
+  Zap,
 } from "lucide-react";
 
 /* ── Constants ──────────────────────────────────────────────── */
@@ -124,6 +127,19 @@ const ENFOQUE_OPTIONS: {
     label: "Tipo Tutorial",
     icon: "📋",
     desc: "Paso a paso claro, orientado a instrucciones accionables.",
+  },
+];
+
+const MODEL_OPTIONS: { value: GeminiModel; label: string; desc: string }[] = [
+  {
+    value: "gemini-2.5-flash",
+    label: "Gemini 2.5 Flash",
+    desc: "Recomendado",
+  },
+  {
+    value: "gemini-2.5-pro",
+    label: "Gemini 2.5 Pro",
+    desc: "Máxima Calidad",
   },
 ];
 
@@ -339,6 +355,8 @@ export default function HomePage() {
           copyLength: store.copyLength,
           facebookFooter: store.facebookFooter,
           facebookHashtags: store.facebookHashtags,
+          apiKey: store.apiKey,
+          model: store.model,
         }),
       });
       const data = await res.json();
@@ -375,7 +393,7 @@ export default function HomePage() {
       const res = await fetch("/api/refine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, instructions }),
+        body: JSON.stringify({ idea, instructions, apiKey: store.apiKey, model: store.model }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -800,6 +818,90 @@ export default function HomePage() {
 
           {/* ── Tab 2: Campaña ── */}
           <TabsContent value="campaign" className="space-y-5 mt-4">
+            {/* API Key Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="bg-zinc-900/50 border-zinc-800/60 py-0 gap-0">
+                <CardContent className="p-4 sm:p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Key className="size-4 text-emerald-400" />
+                      <Label className="text-zinc-300 text-sm font-medium">
+                        API Key de Gemini
+                      </Label>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={
+                        store.apiKey.trim()
+                          ? "border-emerald-600/30 text-emerald-400 text-[10px]"
+                          : "border-zinc-700 text-zinc-500 text-[10px]"
+                      }
+                    >
+                      {store.apiKey.trim() ? "Gemini Activo" : "IA Integrada"}
+                    </Badge>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1">
+                      <Input
+                        type="password"
+                        value={store.apiKey}
+                        onChange={(e) => store.setApiKey(e.target.value)}
+                        placeholder="Pega tu API Key de Google AI Studio (opcional)"
+                        className="bg-zinc-800 border-zinc-700 text-zinc-100 text-sm h-9"
+                      />
+                    </div>
+                    {store.apiKey.trim() && (
+                      <motion.div
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                      >
+                        <Select
+                          value={store.model}
+                          onValueChange={(v) => store.setModel(v as GeminiModel)}
+                        >
+                          <SelectTrigger className="w-[220px] bg-zinc-800 border-zinc-700 h-9 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-zinc-900 border-zinc-700">
+                            {MODEL_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                <span className="text-zinc-200">{opt.label}</span>
+                                <span className="text-zinc-500 ml-1.5 text-xs">
+                                  ({opt.desc})
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-zinc-600">
+                    {store.apiKey.trim() ? (
+                      <>
+                        <Zap className="inline size-3 text-amber-400 mr-1 -mt-0.5" />
+                        Usando <span className="text-amber-400/80 font-medium">{store.model === "gemini-2.5-flash" ? "Gemini 2.5 Flash" : "Gemini 2.5 Pro"}</span> con JSON schema nativo.
+                        Borra la clave para volver a la IA integrada.
+                      </>
+                    ) : (
+                      <>
+                        Sin API Key se usa la IA integrada. Para máxima calidad y JSON estructurado
+                        perfecto, obtén una clave gratuita en{" "}
+                        <span className="text-zinc-400">aistudio.google.com</span>.
+                      </>
+                    )}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
             {/* Messages Count */}
             <div className="space-y-2">
               <Label className="text-zinc-400 text-sm">

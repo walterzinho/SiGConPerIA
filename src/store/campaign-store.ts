@@ -1,7 +1,16 @@
 import { create } from "zustand";
 import type { CharacterData, CampaignIdea, EnfoqueType, CopyLengthType, PhotoStyleType } from "@/types";
 
+export type GeminiModel = "gemini-2.5-flash" | "gemini-2.5-pro";
+
 interface CampaignStore {
+  // API Key & Model
+  apiKey: string;
+  model: GeminiModel;
+  setApiKey: (k: string) => void;
+  setModel: (m: GeminiModel) => void;
+  get useGemini(): boolean;
+
   // Characters
   characters: CharacterData[];
   selectedCharacterId: string | null;
@@ -48,7 +57,16 @@ interface CampaignStore {
   setActiveTab: (tab: "character" | "campaign") => void;
 }
 
-export const useCampaignStore = create<CampaignStore>((set) => ({
+export const useCampaignStore = create<CampaignStore>((set, get) => ({
+  // API Key & Model
+  apiKey: "",
+  model: "gemini-2.5-flash",
+  setApiKey: (k) => set({ apiKey: k }),
+  setModel: (m) => set({ model: m }),
+  get useGemini() {
+    return get().apiKey.trim().length > 0;
+  },
+
   // Characters
   characters: [],
   selectedCharacterId: null,

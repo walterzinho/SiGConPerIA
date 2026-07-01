@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateCampaignContent, saveCampaign } from "@/lib/campaign-service";
 import type { PhotoStyleType, EnfoqueType, CopyLengthType } from "@/types";
+import type { GeminiModel } from "@/store/campaign-store";
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +18,8 @@ export async function POST(request: Request) {
       copyLength,
       facebookFooter,
       facebookHashtags,
+      apiKey,
+      model,
     } = body;
 
     if (!characterName || !characterDesc) {
@@ -37,6 +40,8 @@ export async function POST(request: Request) {
       copyLength: (copyLength || "medio") as CopyLengthType,
       facebookFooter: facebookFooter || "",
       facebookHashtags: facebookHashtags || "",
+      apiKey: apiKey || undefined,
+      model: model as GeminiModel | undefined,
     });
 
     const campaign = await saveCampaign({
