@@ -9,8 +9,9 @@ let sdkAvailable: boolean | null = null;
 async function isSDKAvailable(): Promise<boolean> {
   if (sdkAvailable !== null) return sdkAvailable;
   try {
-    const mod = await import("z-ai-web-dev-sdk");
-    sdkAvailable = !!mod && !!mod.default;
+    /* eslint-disable-next-line @typescript-eslint/no-implied-eval */
+    const mod = await Function('return import("z-ai-web-dev-sdk")')();
+    sdkAvailable = !!mod && !!(mod as Record<string, unknown>).default;
   } catch {
     sdkAvailable = false;
   }
@@ -18,8 +19,9 @@ async function isSDKAvailable(): Promise<boolean> {
 }
 
 async function getSDK(): Promise<unknown> {
-  const mod = await import("z-ai-web-dev-sdk");
-  return mod.default;
+  /* eslint-disable-next-line @typescript-eslint/no-implied-eval */
+  const mod = await Function('return import("z-ai-web-dev-sdk")')();
+  return (mod as Record<string, unknown>).default;
 }
 
 /* ── Prompt Builders ─────────────────────────────────────────── */
