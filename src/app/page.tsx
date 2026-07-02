@@ -503,7 +503,7 @@ export default function HomePage() {
                 </Badge>
               </div>
               <p className="text-xs text-zinc-500 hidden sm:block">
-                Administrador de Campañas de Marketing con Personajes
+                Sistema de Generación de Contenido de personajes con IA
               </p>
             </div>
           </div>
