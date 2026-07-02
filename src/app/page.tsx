@@ -154,7 +154,7 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.06, duration: 0.4, ease: "easeOut" },
+    transition: { delay: i * 0.06, duration: 0.4, ease: "easeOut" as const },
   }),
 };
 
@@ -361,12 +361,13 @@ export default function HomePage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Error en la generación");
+        const friendly = data.friendlyMessage || data.error || "Error en la generación";
+        throw new Error(friendly);
       }
       store.setCurrentCampaignId(data.campaignId);
       store.setCurrentIdeas(data.ideas);
       store.setCampaignMeta(data.meta);
-      store.setHistoryCount((prev) => prev + 1);
+      store.setHistoryCount((store.historyCount || 0) + 1);
       toast.success(
         `Campaña generada: ${data.ideas.length} propuestas creadas`
       );
@@ -397,7 +398,8 @@ export default function HomePage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Error al refinar");
+        const friendly = data.friendlyMessage || data.error || "Error al refinar";
+        throw new Error(friendly);
       }
       store.updateIdeaAtIndex(index, data);
       setRefineTexts((prev) => ({ ...prev, [index]: "" }));
@@ -475,7 +477,7 @@ export default function HomePage() {
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="size-8 animate-spin text-emerald-500" />
-            <p className="text-sm text-zinc-400">Cargando SMC Pro...</p>
+            <p className="text-sm text-zinc-400">Cargando SiGConPerIA...</p>
           </div>
         </div>
       </main>
@@ -494,7 +496,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold tracking-tight text-zinc-50">
-                  SMC Pro
+                  SiGConPerIA
                 </h1>
                 <Badge className="bg-emerald-600/20 text-emerald-400 border-emerald-600/30 text-[10px]">
                   IA
@@ -892,8 +894,8 @@ export default function HomePage() {
                       </>
                     ) : (
                       <>
-                        Sin API Key se usa la IA integrada. Para máxima calidad y JSON estructurado
-                        perfecto, obtén una clave gratuita en{" "}
+                        <span className="text-zinc-400">Obligatorio para despliegues externos (Vercel, etc.)</span>.
+                        En este entorno la IA integrada funciona sin clave. Para máxima calidad, obtén una gratis en{" "}
                         <span className="text-zinc-400">aistudio.google.com</span>.
                       </>
                     )}
@@ -1486,7 +1488,7 @@ export default function HomePage() {
       <footer className="border-t border-zinc-800/40 mt-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <p className="text-center text-xs text-zinc-600">
-            SMC Pro • Voces Campesinas — Gestor de Campañas con IA
+            SiGConPerIA — Generación de Contenido de personajes con IA
           </p>
         </div>
       </footer>

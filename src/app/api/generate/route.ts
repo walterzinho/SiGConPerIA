@@ -66,6 +66,12 @@ export async function POST(request: Request) {
       },
     });
   } catch (error: unknown) {
+    if (error instanceof Error && error.message === "API_KEY_REQUERIDA") {
+      return NextResponse.json({
+        error: "API_KEY_REQUERIDA",
+        friendlyMessage: "Esta plataforma no tiene IA integrada. Ingresa tu API Key de Gemini en la sección de configuración para poder generar contenido.",
+      }, { status: 400 });
+    }
     const message = error instanceof Error ? error.message : "Error desconocido en el llamado API.";
     return NextResponse.json({ error: message }, { status: 500 });
   }

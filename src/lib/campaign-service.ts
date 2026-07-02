@@ -1,8 +1,26 @@
-import ZAI from "z-ai-web-dev-sdk";
 import { db } from "@/lib/db";
 import { PHOTO_STYLES } from "@/types";
 import type { EnfoqueType, CopyLengthType, PhotoStyleType, CampaignIdea } from "@/types";
 import type { GeminiModel } from "@/store/campaign-store";
+
+/* ── SDK availability check (z-ai-web-dev-sdk only exists in Z.ai sandbox) ── */
+let sdkAvailable: boolean | null = null;
+
+async function isSDKAvailable(): Promise<boolean> {
+  if (sdkAvailable !== null) return sdkAvailable;
+  try {
+    const mod = await import("z-ai-web-dev-sdk");
+    sdkAvailable = !!mod && !!mod.default;
+  } catch {
+    sdkAvailable = false;
+  }
+  return sdkAvailable;
+}
+
+async function getSDK(): Promise<unknown> {
+  const mod = await import("z-ai-web-dev-sdk");
+  return mod.default;
+}
 
 /* ── Prompt Builders ─────────────────────────────────────────── */
 
@@ -113,6 +131,10 @@ const GENERATE_SCHEMA = {
 /* ── Z-AI SDK (built-in fallback) ───────────────────────────── */
 
 async function callSDK(systemPrompt: string, userQuery: string): Promise<string> {
+  if (!(await isSDKAvailable())) {
+    throw new Error("IA_INTEGRADA_NO_DISPONIBLE");
+  }
+  const ZAI = (await getSDK()) as { create: () => Promise<{ chat: { completions: { create: (opts: unknown) => Promise<{ choices: Array<{ message?: { content?: string } }> }>} } }> };
   const zai = await ZAI.create();
   const completion = await zai.chat.completions.create({
     messages: [
@@ -163,7 +185,14 @@ export async function generateCampaignContent(params: {
   if (apiKey && apiKey.trim()) {
     responseText = await callGemini(systemPrompt, userQuery, apiKey, model || "gemini-2.5-flash", GENERATE_SCHEMA);
   } else {
-    responseText = await callSDK(systemPrompt, userQuery);
+    try {
+      responseText = await callSDK(systemPrompt, userQuery);
+    } catch (err) {
+      if (err instanceof Error && err.message === "IA_INTEGRADA_NO_DISPONIBLE") {
+        throw new Error("API_KEY_REQUERIDA");
+      }
+      throw err;
+    }
   }
 
   const jsonMatch = responseText.match(/\{[\s\S]*\}/);
@@ -220,16 +249,14 @@ export async function refineSingleIdea(params: {
   if (apiKey && apiKey.trim()) {
     responseText = await callGemini(systemPrompt, agentPrompt, apiKey, model || "gemini-2.5-flash", IDEA_SCHEMA);
   } else {
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
-        { role: "assistant", content: systemPrompt },
-        { role: "user", content: agentPrompt },
-      ],
-      thinking: { type: "disabled" },
-    });
-    responseText = (completion.choices[0] && completion.choices[0].message && completion.choices[0].message.content) || "";
-    if (!responseText) throw new Error("No se recibió respuesta válida al refinar.");
+    try {
+      responseText = await callSDK(systemPrompt, agentPrompt);
+    } catch (err) {
+      if (err instanceof Error && err.message === "IA_INTEGRADA_NO_DISPONIBLE") {
+        throw new Error("API_KEY_REQUERIDA");
+      }
+      throw err;
+    }
   }
 
   const jsonMatch = responseText.match(/\{[\s\S]*\}/);
