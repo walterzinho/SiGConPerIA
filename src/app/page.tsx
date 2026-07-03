@@ -591,8 +591,8 @@ export default function HomePage() {
                         Crear Nuevo Personaje
                       </DialogTitle>
                       <DialogDescription className="text-zinc-400">
-                        Define el nombre, rasgos físicos y URLs de referencia
-                        visual.
+                        Define el personaje completo: nombre, perfil de
+                        personalidad, voz y referencias visuales.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-2">
@@ -609,13 +609,13 @@ export default function HomePage() {
                       </div>
                       <div className="space-y-2">
                         <Label className="text-zinc-300">
-                          Descripción de Rasgos Físicos
+                          Perfil Completo del Personaje
                         </Label>
                         <Textarea
                           value={newDesc}
                           onChange={(e) => setNewDesc(e.target.value)}
-                          placeholder="Describe su apariencia, edad aproximada, vestimenta, expresión..."
-                          rows={4}
+                          placeholder="Ej: Don Pedro Jiménez, 68 años, caficultor de Salento, Quindío. 50 años cultivando café. Habla pausado con dichos populares como "mire usted" y "la tierra no miente". Tono cálido y paternal. Usa expresiones regionales: chagra, parva, guayabera. Explica todo con comparaciones cotidianas del campo."
+                          rows={6}
                           className="bg-zinc-800 border-zinc-700 text-zinc-100"
                         />
                       </div>
@@ -745,12 +745,12 @@ export default function HomePage() {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-zinc-400 text-sm">
-                        Descripción de Rasgos Físicos
+                        Perfil Completo del Personaje
                       </Label>
                       <Textarea
                         value={editDesc}
                         onChange={(e) => setEditDesc(e.target.value)}
-                        rows={4}
+                        rows={6}
                         className="bg-zinc-800 border-zinc-700 text-zinc-100"
                       />
                     </div>
